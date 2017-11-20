@@ -39,7 +39,7 @@ MongoClient.connect('mongodb://localhost:27017/todosApp', (err, db) =>{
 
   // db.collection('Users').insertOne({
   //   // _id: 123,
-  //   name: 'Kaitlin Pham',
+  //   name: 'Brandon Pham',
   //   age: 31,
   //   location: 'California'
   // }, (err, result) => {
