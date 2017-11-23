@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenicate} = require('./middleware/authenicate');
 
 var app = express();
 
@@ -109,6 +110,12 @@ app.post('/users', (req, res) => {
     res.status(400).send(e);
   });
 });
+
+// Private route
+app.get('/users/me', authenicate, (req, res) => {
+  res.send(req.user);
+});
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
