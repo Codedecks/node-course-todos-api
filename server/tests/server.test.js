@@ -5,8 +5,13 @@ const {ObjectID} = require('mongodb');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 const {User} = require('./../models/user');
-const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
-
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed')
+/*
+toNotExist() => toBeFalsy()
+toExist() => toBeTruthy()
+toNotBe() => .not.toBe()
+toInlcude() => toMatchObject()
+*/
 beforeEach(populateUsers);
 beforeEach(populateTodos);
 
@@ -195,7 +200,6 @@ describe('GET /users/me', () => {
   });
 });
 
-
 describe('POST /users', () => {
   it('should create a user', (done) => {
     var email = 'jimmy@gmail.com';
@@ -219,7 +223,7 @@ describe('POST /users', () => {
         expect(user).toBeTruthy();
         expect(user.password).not.toBe();
         done();
-      })
+      }).catch((e) => done(e));
     });
   });
 
@@ -245,4 +249,58 @@ describe('POST /users', () => {
     .end(done);
   });
 
+});
+
+describe('POST /users/login', () => {
+  it('should login user and return token', (done) => {
+    request(app)
+    .post('/users/login')
+    .send({
+      email: users[1].email,
+      password: users[1].password
+    })
+    .expect(200)
+    .expect((res) => {
+      expect(res.headers['x-auth']).toBeTruthy();
+    })
+    .end((err, res) => {
+      if(err){
+        return done(err);
+      }
+
+      User.findById(users[1]._id).then((user) => {
+        // toInclude()
+        expect(user.toObject().tokens[0]).toMatchObject({
+          access: 'auth',
+          token: res.headers['x-auth']
+        });
+        done();
+      })
+      .catch((e) => done(e));
+    });
+  });
+
+  it('should rejectinvalid login', (done) => {
+    request(app)
+    .post('/users/login')
+    .send({
+      email: users[1].email,
+      password: users[1].password + '1'
+    })
+    .expect(400)
+    .expect((res) => {
+      expect(res.headers['x-auth']).toBeFalsy();
+    })
+    .end((err, res) => {
+      if(err){
+        return done(err);
+      }
+
+      User.findById(users[1]._id).then((user) => {
+        expect(user.toObject().tokens.length).toBe(0);
+        done();
+      })
+      .catch((e) => done(e));
+    })
+  });
 });
