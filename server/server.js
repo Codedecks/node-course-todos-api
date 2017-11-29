@@ -129,6 +129,14 @@ app.post('/users/login', (req, res) => {
   });
 });
 
+// User Logout https://www.udemy.com/the-complete-nodejs-developer-course-2/learn/v4/t/lecture/5795024?start=0
+app.delete('/users/me/token', authenicate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
